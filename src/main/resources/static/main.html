@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="PL">
+<head>
+    <title>Main Page</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+<div id="welcomeContainer" class="content">
+    <h1>Welcome to the Mazerr!</h1>
+    <h2>What type of the maze do you want to generate?</h2>
+    <form id="mazeForm">
+        <label for="mazeSize">Enter the size of the maze:</label>
+        <input type="number" id="mazeSize" name="mazeSize" min="1">
+        <label for="mazeMethod">Choose the generating method:</label>
+        <select id="mazeMethod" name="mazeMethod">
+            <option value="1">Prim's Algorithm</option>
+            <option value="2">Kruskal's Algorithm</option>
+        </select>
+        <button type="submit">Generate Maze</button>
+    </form>
+</div>
+
+<div id="mazeContainer">
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
