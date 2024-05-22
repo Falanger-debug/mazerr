@@ -1,5 +1,7 @@
 package com.falanger.mazerr.Maze;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.TextMessage;
@@ -7,6 +9,8 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.util.*;
 
+@Getter
+@Setter
 public class MazeGenerator {
     private static final Logger logger = LoggerFactory.getLogger(MazeGenerator.class);
     private static final int[][] DIRECTIONS = {
@@ -136,7 +140,7 @@ public class MazeGenerator {
         return true;
     }
 
-    private void setRandomEntryAndExit() {
+    public void setRandomEntryAndExit() {
         entryCell = getRandomEdgeCell();
         exitCell = getRandomEdgeCell();
         while (exitCell == entryCell) {

@@ -9,7 +9,7 @@ import java.util.Objects;
 public class MazeWebSocketHandler extends TextWebSocketHandler {
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String query = Objects.requireNonNull(session.getUri()).getQuery();
         int size = 15;
         int speed = 0;
