@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mazerr</title>
+  <style>
+    #maze {
+      font-family: monospace;
+      white-space: pre;
+    }
+  </style>
+</head>
+<body>
+<h1>Maze Generation</h1>
+<div id="maze"></div>
+<button onclick="generateMaze()">Generate Maze</button>
+<script>
+  let socket;
+
+  function generateMaze() {
+    socket = new WebSocket('ws://localhost:8080/maze-generation');
+
+    socket.onopen = function() {
+      console.log('WebSocket is connected.');
+    };
+
+    socket.onmessage = function(event) {
+      document.getElementById('maze').innerText = event.data;
+    };
+
+    socket.onclose = function() {
+      console.log('WebSocket is closed.');
+    };
+
+    socket.onerror = function(error) {
+      console.log('WebSocket error:', error);
+    };
+  }
+</script>
+</body>
+</html>
