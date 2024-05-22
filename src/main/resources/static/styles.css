@@ -1,0 +1,33 @@
+#maze {
+    display: grid;
+    grid-template-columns: repeat(20, 20px); /* Domyślnie 20, zostanie zaktualizowane w JavaScript */
+    grid-gap: 1px;
+}
+.cell {
+    width: 20px;
+    height: 20px;
+    position: relative;
+    box-sizing: border-box;
+}
+.wall-top {
+    border-top: 4px solid black;
+}
+.wall-bottom {
+    border-bottom: 4px solid black;
+}
+.wall-left {
+    border-left: 4px solid black;
+}
+.wall-right {
+    border-right: 4px solid black;
+}
+.entry {
+    background-color: green;
+}
+.exit {
+    background-color: red;
+}
+.solution {
+    background-color: blue;
+    z-index: -1; /* Ensure that the walls are above the solution path */
+}

@@ -3,95 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <title>Mazerr</title>
-  <style>
-    #maze {
-      display: grid;
-      grid-template-columns: repeat(20, 20px); /* Domyślnie 20, zostanie zaktualizowane w JavaScript */
-      grid-gap: 1px;
-    }
-    .cell {
-      width: 20px;
-      height: 20px;
-      box-sizing: border-box;
-    }
-    .wall-top {
-      border-top: 4px solid black;
-    }
-    .wall-bottom {
-      border-bottom: 4px solid black;
-    }
-    .wall-left {
-      border-left: 4px solid black;
-    }
-    .wall-right {
-      border-right: 4px solid black;
-    }
-    .entry {
-      background-color: green;
-    }
-    .exit {
-      background-color: red;
-    }
-  </style>
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<h1>Maze Generation</h1>
+<h1>Maze Generator</h1>
 <form id="mazeForm">
-  <label for="size">Size (max 25):</label>
-  <input type="number" id="size" name="size" min="5" max="25" value="20">
+  <label for="size">Size (5-40):</label>
+  <input type="number" id="size" name="size" min="5" max="40" value="20">
+  <label for="speed">Speed (0-2000 ms per step):</label>
+  <input type="number" id="speed" name="speed" min="0" max="2000" value="50">
   <button type="submit">Generate Maze</button>
 </form>
 <div id="maze"></div>
-<script>
-  let socket;
-
-  document.getElementById('mazeForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const size = document.getElementById('size').value;
-    generateMaze(size);
-  });
-
-  function generateMaze(size) {
-    socket = new WebSocket('ws://localhost:8080/maze-generation?size=' + size);
-
-    socket.onopen = function() {
-      console.log('WebSocket is connected.');
-      socket.send("start");
-    };
-
-    socket.onmessage = function(event) {
-      const mazeData = JSON.parse(event.data);
-      drawMaze(mazeData, size);
-    };
-
-    socket.onclose = function() {
-      console.log('WebSocket is closed.');
-    };
-
-    socket.onerror = function(error) {
-      console.log('WebSocket error:', error);
-    };
-  }
-
-  function drawMaze(mazeData, size) {
-    const mazeContainer = document.getElementById('maze');
-    mazeContainer.innerHTML = '';  // Clear previous maze
-    mazeContainer.style.gridTemplateColumns = `repeat(${size}, 20px)`;
-
-    mazeData.forEach(row => {
-      row.forEach(cell => {
-        const cellDiv = document.createElement('div');
-        cellDiv.classList.add('cell');
-        if (cell.top) cellDiv.classList.add('wall-top');
-        if (cell.bottom) cellDiv.classList.add('wall-bottom');
-        if (cell.left) cellDiv.classList.add('wall-left');
-        if (cell.right) cellDiv.classList.add('wall-right');
-        if (cell.entry) cellDiv.classList.add('entry');
-        if (cell.exit) cellDiv.classList.add('exit');
-        mazeContainer.appendChild(cellDiv);
-      });
-    });
-  }
-</script>
+<script src="/script.js"></script>
 </body>
 </html>
