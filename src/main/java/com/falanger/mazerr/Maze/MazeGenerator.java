@@ -12,23 +12,25 @@ import java.util.Stack;
 
 public class MazeGenerator {
     private static final Logger logger = LoggerFactory.getLogger(MazeGenerator.class);
-    private static final int WIDTH = 20;
-    private static final int HEIGHT = 20;
     private static final int[][] DIRECTIONS = {
             {0, 1}, {1, 0}, {0, -1}, {-1, 0}
     };
 
+    private int width;
+    private int height;
     private Cell[][] maze;
     private WebSocketSession session;
     private Random random = new Random();
     private Cell entryCell;
     private Cell exitCell;
 
-    public MazeGenerator(WebSocketSession session) {
+    public MazeGenerator(WebSocketSession session, int width, int height) {
         this.session = session;
-        maze = new Cell[HEIGHT][WIDTH];
-        for (int y = 0; y < HEIGHT; y++) {
-            for (int x = 0; x < WIDTH; x++) {
+        this.width = width;
+        this.height = height;
+        maze = new Cell[height][width];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
                 maze[y][x] = new Cell(x, y);
             }
         }
@@ -53,7 +55,7 @@ public class MazeGenerator {
                 next.visited = true;
                 stack.push(next);
                 sendMazeState(); // Wyślij aktualny stan labiryntu
-                Thread.sleep(30); // Opóźnienie 500 milisekund
+                Thread.sleep(500); // Opóźnienie 500 milisekund
             }
         }
         logger.info("Maze generation completed");
@@ -76,20 +78,20 @@ public class MazeGenerator {
         int x = 0, y = 0;
         switch (edge) {
             case 0: // Top edge
-                x = random.nextInt(WIDTH);
+                x = random.nextInt(width);
                 y = 0;
                 break;
             case 1: // Right edge
-                x = WIDTH - 1;
-                y = random.nextInt(HEIGHT);
+                x = width - 1;
+                y = random.nextInt(height);
                 break;
             case 2: // Bottom edge
-                x = random.nextInt(WIDTH);
-                y = HEIGHT - 1;
+                x = random.nextInt(width);
+                y = height - 1;
                 break;
             case 3: // Left edge
                 x = 0;
-                y = random.nextInt(HEIGHT);
+                y = random.nextInt(height);
                 break;
         }
         return maze[y][x];
@@ -98,9 +100,9 @@ public class MazeGenerator {
     private void removeEdgeWall(Cell cell) {
         if (cell.y == 0) {
             cell.top = false;
-        } else if (cell.x == WIDTH - 1) {
+        } else if (cell.x == width - 1) {
             cell.right = false;
-        } else if (cell.y == HEIGHT - 1) {
+        } else if (cell.y == height - 1) {
             cell.bottom = false;
         } else if (cell.x == 0) {
             cell.left = false;
@@ -113,7 +115,7 @@ public class MazeGenerator {
             int nx = cell.x + direction[0];
             int ny = cell.y + direction[1];
 
-            if (nx >= 0 && ny >= 0 && nx < WIDTH && ny < HEIGHT && !maze[ny][nx].visited) {
+            if (nx >= 0 && ny >= 0 && nx < width && ny < height && !maze[ny][nx].visited) {
                 neighbors.add(maze[ny][nx]);
             }
         }
@@ -142,14 +144,14 @@ public class MazeGenerator {
     private void sendMazeState() throws Exception {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
-        for (int y = 0; y < HEIGHT; y++) {
+        for (int y = 0; y < height; y++) {
             sb.append("[");
-            for (int x = 0; x < WIDTH; x++) {
+            for (int x = 0; x < width; x++) {
                 sb.append(maze[y][x].toJson());
-                if (x < WIDTH - 1) sb.append(",");
+                if (x < width - 1) sb.append(",");
             }
             sb.append("]");
-            if (y < HEIGHT - 1) sb.append(",");
+            if (y < height - 1) sb.append(",");
         }
         sb.append("]");
         logger.info("Sending maze state:\n" + sb.toString());

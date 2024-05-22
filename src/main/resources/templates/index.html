@@ -6,7 +6,7 @@
   <style>
     #maze {
       display: grid;
-      grid-template-columns: repeat(20, 20px);
+      grid-template-columns: repeat(20, 20px); /* Domyślnie 20, zostanie zaktualizowane w JavaScript */
       grid-gap: 1px;
     }
     .cell {
@@ -36,13 +36,23 @@
 </head>
 <body>
 <h1>Maze Generation</h1>
+<form id="mazeForm">
+  <label for="size">Size (max 25):</label>
+  <input type="number" id="size" name="size" min="5" max="25" value="20">
+  <button type="submit">Generate Maze</button>
+</form>
 <div id="maze"></div>
-<button onclick="generateMaze()">Generate Maze</button>
 <script>
   let socket;
 
-  function generateMaze() {
-    socket = new WebSocket('ws://localhost:8080/maze-generation');
+  document.getElementById('mazeForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const size = document.getElementById('size').value;
+    generateMaze(size);
+  });
+
+  function generateMaze(size) {
+    socket = new WebSocket('ws://localhost:8080/maze-generation?size=' + size);
 
     socket.onopen = function() {
       console.log('WebSocket is connected.');
@@ -51,7 +61,7 @@
 
     socket.onmessage = function(event) {
       const mazeData = JSON.parse(event.data);
-      drawMaze(mazeData);
+      drawMaze(mazeData, size);
     };
 
     socket.onclose = function() {
@@ -63,9 +73,10 @@
     };
   }
 
-  function drawMaze(mazeData) {
+  function drawMaze(mazeData, size) {
     const mazeContainer = document.getElementById('maze');
     mazeContainer.innerHTML = '';  // Clear previous maze
+    mazeContainer.style.gridTemplateColumns = `repeat(${size}, 20px)`;
 
     mazeData.forEach(row => {
       row.forEach(cell => {

@@ -1,18 +1,30 @@
 package com.falanger.mazerr.Maze;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.util.Objects;
+
 public class MazeWebSocketHandler extends TextWebSocketHandler {
-    private static final Logger logger = LoggerFactory.getLogger(MazeWebSocketHandler.class);
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        logger.info("Received message: " + message.getPayload());
-        MazeGenerator generator = new MazeGenerator(session);
+        String query = Objects.requireNonNull(session.getUri()).getQuery();
+        int size = 20; // Domyślny rozmiar
+
+        if (query != null && query.startsWith("size=")) {
+            try {
+                size = Integer.parseInt(query.substring(5));
+                if (size < 5 || size > 25) {
+                    size = 20; // Domyślny rozmiar, jeśli wartość jest poza zakresem
+                }
+            } catch (NumberFormatException e) {
+                // Ignoruj niepoprawne wartości i użyj domyślnego rozmiaru
+            }
+        }
+
+        MazeGenerator generator = new MazeGenerator(session, size, size);
         generator.generateMaze();
     }
 }
