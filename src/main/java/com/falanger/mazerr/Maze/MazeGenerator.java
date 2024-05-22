@@ -1,5 +1,7 @@
 package com.falanger.mazerr.Maze;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -9,6 +11,7 @@ import java.util.Random;
 import java.util.Stack;
 
 public class MazeGenerator {
+    private static final Logger logger = LoggerFactory.getLogger(MazeGenerator.class);
     private static final int WIDTH = 20;
     private static final int HEIGHT = 20;
     private static final int[][] DIRECTIONS = {
@@ -30,6 +33,7 @@ public class MazeGenerator {
     }
 
     public void generateMaze() throws Exception {
+        logger.info("Maze generation started");
         Stack<Cell> stack = new Stack<>();
         Cell start = maze[0][0];
         start.visited = true;
@@ -50,6 +54,7 @@ public class MazeGenerator {
                 Thread.sleep(500); // Opóźnienie 500 milisekund
             }
         }
+        logger.info("Maze generation completed");
     }
 
     private List<Cell> getUnvisitedNeighbors(Cell cell) {
@@ -92,6 +97,7 @@ public class MazeGenerator {
             }
             sb.append("\n");
         }
+        logger.info("Sending maze state:\n" + sb.toString());
         session.sendMessage(new TextMessage(sb.toString()));
     }
 

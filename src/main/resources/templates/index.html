@@ -22,9 +22,11 @@
 
     socket.onopen = function() {
       console.log('WebSocket is connected.');
+      socket.send("start");  // Wysłanie wiadomości po otwarciu połączenia
     };
 
     socket.onmessage = function(event) {
+      console.log('Message from server: ', event.data);
       document.getElementById('maze').innerText = event.data;
     };
 
