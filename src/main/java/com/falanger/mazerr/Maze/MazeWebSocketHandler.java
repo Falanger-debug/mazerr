@@ -11,8 +11,8 @@ public class MazeWebSocketHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String query = Objects.requireNonNull(session.getUri()).getQuery();
-        int size = 20; // Domyślny rozmiar
-        int speed = 50; // Domyślne tempo
+        int size = 15; // Domyślny rozmiar
+        int speed = 0; // Domyślne tempo
 
         if (query != null) {
             String[] params = query.split("&");
@@ -21,7 +21,7 @@ public class MazeWebSocketHandler extends TextWebSocketHandler {
                     try {
                         size = Integer.parseInt(param.substring(5));
                         if (size < 5 || size > 40) {
-                            size = 20; // Domyślny rozmiar, jeśli wartość jest poza zakresem
+                            size = 15; // Domyślny rozmiar, jeśli wartość jest poza zakresem
                         }
                     } catch (NumberFormatException e) {
                         // Ignoruj niepoprawne wartości i użyj domyślnego rozmiaru
@@ -30,7 +30,7 @@ public class MazeWebSocketHandler extends TextWebSocketHandler {
                     try {
                         speed = Integer.parseInt(param.substring(6));
                         if (speed < 0 || speed > 2000) {
-                            speed = 50; // Domyślne tempo, jeśli wartość jest poza zakresem
+                            speed = 0; // Domyślne tempo, jeśli wartość jest poza zakresem
                         }
                     } catch (NumberFormatException e) {
                         // Ignoruj niepoprawne wartości i użyj domyślnego tempa

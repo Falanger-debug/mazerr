@@ -46,12 +46,15 @@ function generateMaze(size, speed) {
 function drawMaze(mazeData, size) {
   const mazeContainer = document.getElementById('maze');
   mazeContainer.innerHTML = '';
-  mazeContainer.style.gridTemplateColumns = `repeat(${size}, 20px)`;
+  const cellSize = Math.min(20, 400 / size); // Adjust cell size to fit within 400px width
+  mazeContainer.style.gridTemplateColumns = `repeat(${size}, ${cellSize}px)`;
 
   mazeData.forEach(row => {
     row.forEach(cell => {
       const cellDiv = document.createElement('div');
       cellDiv.classList.add('cell');
+      cellDiv.style.width = `${cellSize}px`;
+      cellDiv.style.height = `${cellSize}px`;
       cellDiv.setAttribute('data-x', cell.x);
       cellDiv.setAttribute('data-y', cell.y);
       if (cell.top) cellDiv.classList.add('wall-top');
