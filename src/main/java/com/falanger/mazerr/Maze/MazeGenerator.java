@@ -21,6 +21,8 @@ public class MazeGenerator {
     private Cell[][] maze;
     private WebSocketSession session;
     private Random random = new Random();
+    private Cell entryCell;
+    private Cell exitCell;
 
     public MazeGenerator(WebSocketSession session) {
         this.session = session;
@@ -34,10 +36,10 @@ public class MazeGenerator {
 
     public void generateMaze() throws Exception {
         logger.info("Maze generation started");
+        setRandomEntryAndExit();
         Stack<Cell> stack = new Stack<>();
-        Cell start = maze[0][0];
-        start.visited = true;
-        stack.push(start);
+        entryCell.visited = true;
+        stack.push(entryCell);
 
         while (!stack.isEmpty()) {
             Cell current = stack.peek();
@@ -51,10 +53,58 @@ public class MazeGenerator {
                 next.visited = true;
                 stack.push(next);
                 sendMazeState(); // Wyślij aktualny stan labiryntu
-                Thread.sleep(500); // Opóźnienie 500 milisekund
+                Thread.sleep(30); // Opóźnienie 500 milisekund
             }
         }
         logger.info("Maze generation completed");
+    }
+
+    private void setRandomEntryAndExit() {
+        entryCell = getRandomEdgeCell();
+        exitCell = getRandomEdgeCell();
+        while (exitCell == entryCell) {
+            exitCell = getRandomEdgeCell();
+        }
+        entryCell.entry = true;
+        exitCell.exit = true;
+        removeEdgeWall(entryCell);
+        removeEdgeWall(exitCell);
+    }
+
+    private Cell getRandomEdgeCell() {
+        int edge = random.nextInt(4);
+        int x = 0, y = 0;
+        switch (edge) {
+            case 0: // Top edge
+                x = random.nextInt(WIDTH);
+                y = 0;
+                break;
+            case 1: // Right edge
+                x = WIDTH - 1;
+                y = random.nextInt(HEIGHT);
+                break;
+            case 2: // Bottom edge
+                x = random.nextInt(WIDTH);
+                y = HEIGHT - 1;
+                break;
+            case 3: // Left edge
+                x = 0;
+                y = random.nextInt(HEIGHT);
+                break;
+        }
+        return maze[y][x];
+    }
+
+    private void removeEdgeWall(Cell cell) {
+        if (cell.y == 0) {
+            cell.top = false;
+        } else if (cell.x == WIDTH - 1) {
+            cell.right = false;
+        } else if (cell.y == HEIGHT - 1) {
+            cell.bottom = false;
+        } else if (cell.x == 0) {
+            cell.left = false;
+        }
     }
 
     private List<Cell> getUnvisitedNeighbors(Cell cell) {
@@ -91,12 +141,17 @@ public class MazeGenerator {
 
     private void sendMazeState() throws Exception {
         StringBuilder sb = new StringBuilder();
+        sb.append("[");
         for (int y = 0; y < HEIGHT; y++) {
+            sb.append("[");
             for (int x = 0; x < WIDTH; x++) {
-                sb.append(maze[y][x].toString());
+                sb.append(maze[y][x].toJson());
+                if (x < WIDTH - 1) sb.append(",");
             }
-            sb.append("\n");
+            sb.append("]");
+            if (y < HEIGHT - 1) sb.append(",");
         }
+        sb.append("]");
         logger.info("Sending maze state:\n" + sb.toString());
         session.sendMessage(new TextMessage(sb.toString()));
     }
@@ -105,15 +160,19 @@ public class MazeGenerator {
         int x, y;
         boolean visited = false;
         boolean top = true, bottom = true, left = true, right = true;
+        boolean entry = false;
+        boolean exit = false;
 
         Cell(int x, int y) {
             this.x = x;
             this.y = y;
         }
 
-        @Override
-        public String toString() {
-            return visited ? "1" : "0"; // Lub inna reprezentacja
+        String toJson() {
+            return String.format(
+                    "{\"x\":%d,\"y\":%d,\"top\":%b,\"bottom\":%b,\"left\":%b,\"right\":%b,\"entry\":%b,\"exit\":%b}",
+                    x, y, top, bottom, left, right, entry, exit
+            );
         }
     }
 }

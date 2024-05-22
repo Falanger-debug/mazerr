@@ -5,8 +5,32 @@
   <title>Mazerr</title>
   <style>
     #maze {
-      font-family: monospace;
-      white-space: pre;
+      display: grid;
+      grid-template-columns: repeat(20, 20px);
+      grid-gap: 1px;
+    }
+    .cell {
+      width: 20px;
+      height: 20px;
+      box-sizing: border-box;
+    }
+    .wall-top {
+      border-top: 4px solid black;
+    }
+    .wall-bottom {
+      border-bottom: 4px solid black;
+    }
+    .wall-left {
+      border-left: 4px solid black;
+    }
+    .wall-right {
+      border-right: 4px solid black;
+    }
+    .entry {
+      background-color: green;
+    }
+    .exit {
+      background-color: red;
     }
   </style>
 </head>
@@ -22,12 +46,12 @@
 
     socket.onopen = function() {
       console.log('WebSocket is connected.');
-      socket.send("start");  // Wysłanie wiadomości po otwarciu połączenia
+      socket.send("start");
     };
 
     socket.onmessage = function(event) {
-      console.log('Message from server: ', event.data);
-      document.getElementById('maze').innerText = event.data;
+      const mazeData = JSON.parse(event.data);
+      drawMaze(mazeData);
     };
 
     socket.onclose = function() {
@@ -37,6 +61,25 @@
     socket.onerror = function(error) {
       console.log('WebSocket error:', error);
     };
+  }
+
+  function drawMaze(mazeData) {
+    const mazeContainer = document.getElementById('maze');
+    mazeContainer.innerHTML = '';  // Clear previous maze
+
+    mazeData.forEach(row => {
+      row.forEach(cell => {
+        const cellDiv = document.createElement('div');
+        cellDiv.classList.add('cell');
+        if (cell.top) cellDiv.classList.add('wall-top');
+        if (cell.bottom) cellDiv.classList.add('wall-bottom');
+        if (cell.left) cellDiv.classList.add('wall-left');
+        if (cell.right) cellDiv.classList.add('wall-right');
+        if (cell.entry) cellDiv.classList.add('entry');
+        if (cell.exit) cellDiv.classList.add('exit');
+        mazeContainer.appendChild(cellDiv);
+      });
+    });
   }
 </script>
 </body>
