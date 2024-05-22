@@ -46,7 +46,7 @@ function generateMaze(size, speed) {
 function drawMaze(mazeData, size) {
   const mazeContainer = document.getElementById('maze');
   mazeContainer.innerHTML = '';
-  const cellSize = Math.min(20, 400 / size); // Adjust cell size to fit within 400px width
+  const cellSize = Math.min(20, 400 / size);
   mazeContainer.style.gridTemplateColumns = `repeat(${size}, ${cellSize}px)`;
 
   mazeData.forEach(row => {

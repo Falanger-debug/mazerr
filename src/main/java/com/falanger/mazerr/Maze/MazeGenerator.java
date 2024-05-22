@@ -13,15 +13,15 @@ public class MazeGenerator {
             {0, 1}, {1, 0}, {0, -1}, {-1, 0}
     };
 
-    private int width;
-    private int height;
-    private int speed;
-    private Cell[][] maze;
-    private WebSocketSession session;
-    private Random random = new Random();
+    private final int width;
+    private final int height;
+    private final int speed;
+    private final Cell[][] maze;
+    private final WebSocketSession session;
+    private final Random random = new Random();
     private Cell entryCell;
     private Cell exitCell;
-    private List<Cell> solutionPath = new ArrayList<>();
+    private final List<Cell> solutionPath = new ArrayList<>();
 
     public MazeGenerator(WebSocketSession session, int width, int height, int speed) {
         this.session = session;
@@ -54,8 +54,8 @@ public class MazeGenerator {
                 removeWall(current, next);
                 next.visited = true;
                 stack.push(next);
-                sendMazeState(); // Wyślij aktualny stan labiryntu
-                Thread.sleep(speed); // Opóźnienie zależne od tempa
+                sendMazeState();
+                Thread.sleep(speed);
             }
         }
         logger.info("Maze generation completed");
@@ -73,9 +73,8 @@ public class MazeGenerator {
         while (!stack.isEmpty()) {
             Cell current = stack.pop();
 
-            if (current == exitCell) {
+            if (current == exitCell)
                 break;
-            }
 
             List<Cell> neighbors = getVisitedNeighbors(current);
             for (Cell neighbor : neighbors) {
@@ -87,13 +86,13 @@ public class MazeGenerator {
             }
         }
 
-        // Rekonstrukcja ścieżki
+        // Path reconstruction
         Cell step = exitCell;
         while (step != null) {
             solutionPath.add(step);
             step = pathMap.get(step);
         }
-        Collections.reverse(solutionPath); // Odwracamy ścieżkę, aby zaczynała się od wejścia
+        Collections.reverse(solutionPath);
     }
 
     private void resetVisitedCells() {
@@ -153,22 +152,16 @@ public class MazeGenerator {
         int edge = random.nextInt(4);
         int x = 0, y = 0;
         switch (edge) {
-            case 0: // Top edge
-                x = random.nextInt(width);
-                y = 0;
-                break;
-            case 1: // Right edge
+            case 0 -> x = random.nextInt(width);// Top edge
+            case 1 -> { // Right edge
                 x = width - 1;
                 y = random.nextInt(height);
-                break;
-            case 2: // Bottom edge
+            }
+            case 2 -> { // Bottom edge
                 x = random.nextInt(width);
                 y = height - 1;
-                break;
-            case 3: // Left edge
-                x = 0;
-                y = random.nextInt(height);
-                break;
+            }
+            case 3 -> y = random.nextInt(height);// Left edge
         }
         return maze[y][x];
     }
@@ -230,7 +223,7 @@ public class MazeGenerator {
             if (y < height - 1) sb.append(",");
         }
         sb.append("]");
-        logger.info("Sending maze state:\n" + sb.toString());
+        logger.info("Sending maze state:\n" + sb);
         session.sendMessage(new TextMessage(sb.toString()));
     }
 
@@ -244,25 +237,5 @@ public class MazeGenerator {
         sb.append("]");
         logger.info("Sending solution path:\n" + sb.toString());
         session.sendMessage(new TextMessage(sb.toString()));
-    }
-
-    class Cell {
-        int x, y;
-        boolean visited = false;
-        boolean top = true, bottom = true, left = true, right = true;
-        boolean entry = false;
-        boolean exit = false;
-
-        Cell(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        String toJson() {
-            return String.format(
-                    "{\"x\":%d,\"y\":%d,\"top\":%b,\"bottom\":%b,\"left\":%b,\"right\":%b,\"entry\":%b,\"exit\":%b}",
-                    x, y, top, bottom, left, right, entry, exit
-            );
-        }
     }
 }
