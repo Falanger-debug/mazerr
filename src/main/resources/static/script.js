@@ -5,6 +5,7 @@ document.getElementById('mazeForm').addEventListener('submit', function(event) {
   event.preventDefault();
   const size = document.getElementById('size').value;
   const speed = document.getElementById('speed').value;
+  const algorithm = document.getElementById('algorithm').value;
   mazeSize = size;
 
   if (socket && socket.readyState === WebSocket.OPEN) {
@@ -12,11 +13,13 @@ document.getElementById('mazeForm').addEventListener('submit', function(event) {
     document.getElementById('maze').innerHTML = '';
   }
 
-  generateMaze(size, speed);
+  generateMaze(size, speed, algorithm);
 });
 
-function generateMaze(size, speed) {
-  socket = new WebSocket('ws://localhost:8080/maze-generation?size=' + size + '&speed=' + speed);
+function generateMaze(size, speed, algorithm) {
+  console.log(`Generating maze with size=${size}, speed=${speed}, algorithm=${algorithm}`); // Logowanie
+
+  socket = new WebSocket(`ws://localhost:8080/maze-generation?size=${size}&speed=${speed}&algorithm=${algorithm}`);
 
   socket.onopen = function() {
     console.log('WebSocket is connected.');

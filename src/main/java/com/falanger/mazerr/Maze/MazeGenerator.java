@@ -20,6 +20,7 @@ public class MazeGenerator {
     private final int width;
     private final int height;
     private final int speed;
+    private final String method;
     private final Cell[][] maze;
     private final WebSocketSession session;
     private final Random random = new Random();
@@ -27,11 +28,12 @@ public class MazeGenerator {
     private Cell exitCell;
     private final List<Cell> solutionPath = new ArrayList<>();
 
-    public MazeGenerator(WebSocketSession session, int width, int height, int speed) {
+    public MazeGenerator(WebSocketSession session, int width, int height, int speed, String method) {
         this.session = session;
         this.width = width;
         this.height = height;
         this.speed = speed;
+        this.method = method;
         maze = new Cell[height][width];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -43,6 +45,24 @@ public class MazeGenerator {
     public void generateMaze() throws Exception {
         logger.info("Maze generation started");
         setRandomEntryAndExit();
+
+        if ("Prim".equals(method)) {
+            logger.info("Using Prim's algorithm");
+            prim();
+        } else {
+            recursiveBacktracking();
+        }
+
+        logger.info("Maze generation completed");
+        findSolutionPath();
+        sendSolutionPath();
+    }
+
+    private void prim() throws Exception {
+
+    }
+
+    private void recursiveBacktracking() throws Exception {
         Stack<Cell> stack = new Stack<>();
         entryCell.visited = true;
         stack.push(entryCell);
@@ -62,9 +82,6 @@ public class MazeGenerator {
                 Thread.sleep(speed);
             }
         }
-        logger.info("Maze generation completed");
-        findSolutionPath();
-        sendSolutionPath();
     }
 
     private void findSolutionPath() {
@@ -156,7 +173,7 @@ public class MazeGenerator {
         int edge = random.nextInt(4);
         int x = 0, y = 0;
         switch (edge) {
-            case 0 -> x = random.nextInt(width);// Top edge
+            case 0 -> x = random.nextInt(width); // Top edge
             case 1 -> { // Right edge
                 x = width - 1;
                 y = random.nextInt(height);
@@ -165,7 +182,7 @@ public class MazeGenerator {
                 x = random.nextInt(width);
                 y = height - 1;
             }
-            case 3 -> y = random.nextInt(height);// Left edge
+            case 3 -> y = random.nextInt(height); // Left edge
         }
         return maze[y][x];
     }
@@ -193,6 +210,56 @@ public class MazeGenerator {
             }
         }
         return neighbors;
+    }
+
+    private List<Cell> getAdjacentWalls(Cell cell) {
+        List<Cell> walls = new ArrayList<>();
+        for (int[] direction : DIRECTIONS) {
+            int nx = cell.x + direction[0];
+            int ny = cell.y + direction[1];
+
+            if (nx >= 0 && ny >= 0 && nx < width && ny < height && !maze[ny][nx].visited) {
+                walls.add(maze[ny][nx]);
+            }
+        }
+        return walls;
+    }
+
+    private Cell[] getAdjacentCells(Cell wall) {
+        Cell[] adjacentCells = new Cell[2];
+        int count = 0;
+
+        for (int[] direction : DIRECTIONS) {
+            int nx = wall.x + direction[0];
+            int ny = wall.y + direction[1];
+
+            if (nx >= 0 && ny >= 0 && nx < width && ny < height) {
+                adjacentCells[count++] = maze[ny][nx];
+                if (count == 2) break;
+            }
+        }
+
+        return adjacentCells;
+    }
+
+    private void removeWallBetween(Cell a, Cell b) {
+        if (a.x == b.x) {
+            if (a.y < b.y) {
+                a.bottom = false;
+                b.top = false;
+            } else {
+                a.top = false;
+                b.bottom = false;
+            }
+        } else if (a.y == b.y) {
+            if (a.x < b.x) {
+                a.right = false;
+                b.left = false;
+            } else {
+                a.left = false;
+                b.right = false;
+            }
+        }
     }
 
     private void removeWall(Cell a, Cell b) {
@@ -227,7 +294,6 @@ public class MazeGenerator {
             if (y < height - 1) sb.append(",");
         }
         sb.append("]");
-        logger.info("Sending maze state:\n" + sb);
         session.sendMessage(new TextMessage(sb.toString()));
     }
 
@@ -239,7 +305,7 @@ public class MazeGenerator {
             if (solutionPath.indexOf(cell) < solutionPath.size() - 1) sb.append(",");
         }
         sb.append("]");
-        logger.info("Sending solution path:\n" + sb.toString());
+        logger.info("Sending solution path\n");
         session.sendMessage(new TextMessage(sb.toString()));
     }
 }

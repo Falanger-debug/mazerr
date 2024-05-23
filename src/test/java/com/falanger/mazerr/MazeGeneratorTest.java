@@ -17,7 +17,7 @@ public class MazeGeneratorTest {
     @BeforeEach
     public void setUp(){
         session = mock(WebSocketSession.class);
-        generator = new MazeGenerator(session, 10, 10, 0);
+        generator = new MazeGenerator(session, 10, 10, 0, "R_B");
     }
 
     @Test

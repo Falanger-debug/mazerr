@@ -13,6 +13,7 @@ public class MazeWebSocketHandler extends TextWebSocketHandler {
         String query = Objects.requireNonNull(session.getUri()).getQuery();
         int size = 15;
         int speed = 0;
+        String algorithm = "R_B";
 
         if (query != null) {
             String[] params = query.split("&");
@@ -20,21 +21,19 @@ public class MazeWebSocketHandler extends TextWebSocketHandler {
                 if (param.startsWith("size=")) {
                     try {
                         size = Integer.parseInt(param.substring(5));
-                        if (size < 5 || size > 40) {
-                            size = 15;
-                        }
-                    } catch (NumberFormatException ignored) {
-                    }
+                    } catch (NumberFormatException ignored) {}
                 } else if (param.startsWith("speed=")) {
                     try {
                         speed = Integer.parseInt(param.substring(6));
                     } catch (NumberFormatException ignored) {
                     }
+                } else if (param.startsWith("algorithm=")){
+                    algorithm = param.substring(10);
                 }
             }
         }
 
-        MazeGenerator generator = new MazeGenerator(session, size, size, speed);
+        MazeGenerator generator = new MazeGenerator(session, size, size, speed, algorithm);
         generator.generateMaze();
     }
 }
