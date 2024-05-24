@@ -41,8 +41,7 @@ public class MazeUtils {
         generator.setExitCell(exitCell);
     }
 
-
-    public static List<Cell> getVisitedNeighbors(Cell currentCell, Cell[][] maze, int width, int height) {
+    public static List<Cell> getNeighbors(Cell currentCell, Cell[][] maze, int width, int height, boolean alreadyChecked) {
         List<Cell> neighbors = new ArrayList<>();
         for (Direction dir : Direction.values()) {
             int nx = currentCell.x + dir.getDeltaX();
@@ -50,29 +49,22 @@ public class MazeUtils {
 
             if (nx >= 0 && ny >= 0 && nx < width && ny < height) {
                 Cell neighbor = maze[ny][nx];
-                if (!neighbor.visited && !currentCell.isWallBetween(neighbor)) {
-                    neighbors.add(neighbor);
+                if (!neighbor.visited) {
+                    if (alreadyChecked) {
+                        if (!currentCell.isWallBetween(neighbor)) {
+                            neighbors.add(neighbor);
+                        }
+                    } else {
+                        neighbors.add(neighbor);
+                    }
                 }
             }
         }
         return neighbors;
     }
 
-    public static List<Cell> getUnvisitedNeighbors(Cell cell, Cell[][] maze, int width, int height) {
-        List<Cell> neighbors = new ArrayList<>();
-        for (Direction dir : Direction.values()) {
-            int nx = cell.x + dir.getDeltaX();
-            int ny = cell.y + dir.getDeltaY();
-
-            if (nx >= 0 && ny >= 0 && nx < width && ny < height && !maze[ny][nx].visited) {
-                neighbors.add(maze[ny][nx]);
-            }
-        }
-        return neighbors;
-    }
-
-
-    public static void sendMazeState(Cell[][] maze, int width, int height, WebSocketSession session ) throws Exception {
+    public static void sendMazeState(Cell[][] maze, int width, int height, WebSocketSession session) throws
+            Exception {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         for (int y = 0; y < height; y++) {
@@ -88,9 +80,10 @@ public class MazeUtils {
         session.sendMessage(new TextMessage(sb.toString()));
     }
 
-    public static void sendSolutionPath(List<Cell> solutionPath, WebSocketSession session, Object... options) throws Exception {
+    public static void sendSolutionPath(List<Cell> solutionPath, WebSocketSession session, Object... options) throws
+            Exception {
         Logger logger = null;
-        for(Object option : options) {
+        for (Object option : options) {
             if (option instanceof Logger) {
                 logger = (Logger) option;
             }
@@ -103,14 +96,15 @@ public class MazeUtils {
             if (solutionPath.indexOf(cell) < solutionPath.size() - 1) sb.append(",");
         }
         sb.append("]");
-        if(logger != null){
+        if (logger != null) {
             logger.info("Sending solution path\n");
         }
 
         session.sendMessage(new TextMessage(sb.toString()));
     }
 
-    public static void findSolutionPath(Cell[][] maze, int width, int height, Cell entryCell, Cell exitCell, List<Cell> solutionPath) {
+    public static void findSolutionPath(Cell[][] maze, int width, int height, Cell entryCell, Cell
+            exitCell, List<Cell> solutionPath) {
         Stack<Cell> stack = new Stack<>();
         Map<Cell, Cell> pathMap = new HashMap<>();
         resetVisitedCells(maze, width, height);
@@ -123,7 +117,7 @@ public class MazeUtils {
             if (current == exitCell)
                 break;
 
-            List<Cell> neighbors = MazeUtils.getVisitedNeighbors(current, maze, width, height);
+            List<Cell> neighbors = MazeUtils.getNeighbors(current, maze, width, height, true);
             for (Cell neighbor : neighbors) {
                 if (!neighbor.visited) {
                     neighbor.visited = true;

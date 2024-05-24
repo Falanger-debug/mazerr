@@ -69,7 +69,7 @@ public class MazeGenerator {
 
         while (!stack.isEmpty()) {
             Cell current = stack.peek();
-            List<Cell> neighbors = MazeUtils.getUnvisitedNeighbors(current, maze, width, height);
+            List<Cell> neighbors = MazeUtils.getNeighbors(current, maze, width, height, false);
 
             if (neighbors.isEmpty()) {
                 stack.pop();
