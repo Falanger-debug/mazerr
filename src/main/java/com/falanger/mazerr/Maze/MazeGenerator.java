@@ -15,9 +15,6 @@ import java.util.Stack;
 @Setter
 public class MazeGenerator {
     private static final Logger logger = LoggerFactory.getLogger(MazeGenerator.class);
-    static final int[][] DIRECTIONS = {
-            {0, 1}, {1, 0}, {0, -1}, {-1, 0}
-    };
 
     private final int width;
     private final int height;
@@ -52,16 +49,17 @@ public class MazeGenerator {
             logger.info("Using Prim's algorithm");
             prim();
         } else {
+            logger.info("Using recursive backtracking algorithm");
             recursiveBacktracking();
         }
 
         logger.info("Maze generation completed");
         MazeUtils.findSolutionPath(maze, width, height, entryCell, exitCell, solutionPath);
-        MazeUtils.sendSolutionPath(solutionPath, logger, session);
+        MazeUtils.sendSolutionPath(solutionPath, session);
     }
 
     private void prim() throws Exception {
-
+        // Implementacja Prim's algorithm
     }
 
     private void recursiveBacktracking() throws Exception {
@@ -77,7 +75,7 @@ public class MazeGenerator {
                 stack.pop();
             } else {
                 Cell next = neighbors.get(random.nextInt(neighbors.size()));
-                MazeUtils.removeWall(current, next);
+                current.removeWall(next);
                 next.visited = true;
                 stack.push(next);
                 MazeUtils.sendMazeState(maze, width, height, session);

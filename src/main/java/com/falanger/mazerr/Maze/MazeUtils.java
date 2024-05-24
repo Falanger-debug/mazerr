@@ -7,8 +7,6 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.util.*;
 
-import static com.falanger.mazerr.Maze.MazeGenerator.DIRECTIONS;
-
 public class MazeUtils {
 
     static Cell getRandomEdgeCell(Cell[][] maze, int width, int height, Random random) {
@@ -37,34 +35,22 @@ public class MazeUtils {
         }
         entryCell.entry = true;
         exitCell.exit = true;
-        removeEdgeWall(entryCell, width, height);
-        removeEdgeWall(exitCell, width, height);
+        entryCell.removeEdgeWall(width, height);
+        exitCell.removeEdgeWall(width, height);
         generator.setEntryCell(entryCell);
         generator.setExitCell(exitCell);
     }
 
 
-    public static void removeEdgeWall(Cell cell, int width, int height) {
-        if (cell.y == 0) {
-            cell.top = false;
-        } else if (cell.x == width - 1) {
-            cell.right = false;
-        } else if (cell.y == height - 1) {
-            cell.bottom = false;
-        } else if (cell.x == 0) {
-            cell.left = false;
-        }
-    }
-
-    public static List<Cell> getVisitedNeighbors(Cell cell, Cell[][] maze, int width, int height) {
+    public static List<Cell> getVisitedNeighbors(Cell currentCell, Cell[][] maze, int width, int height) {
         List<Cell> neighbors = new ArrayList<>();
-        for (int[] direction : DIRECTIONS) {
-            int nx = cell.x + direction[0];
-            int ny = cell.y + direction[1];
+        for (Direction dir : Direction.values()) {
+            int nx = currentCell.x + dir.getDeltaX();
+            int ny = currentCell.y + dir.getDeltaY();
 
             if (nx >= 0 && ny >= 0 && nx < width && ny < height) {
                 Cell neighbor = maze[ny][nx];
-                if (!neighbor.visited && !isWallBetween(cell, neighbor)) {
+                if (!neighbor.visited && !currentCell.isWallBetween(neighbor)) {
                     neighbors.add(neighbor);
                 }
             }
@@ -74,32 +60,15 @@ public class MazeUtils {
 
     public static List<Cell> getUnvisitedNeighbors(Cell cell, Cell[][] maze, int width, int height) {
         List<Cell> neighbors = new ArrayList<>();
-        for (int[] direction : DIRECTIONS) {
-            int nx = cell.x + direction[0];
-            int ny = cell.y + direction[1];
+        for (Direction dir : Direction.values()) {
+            int nx = cell.x + dir.getDeltaX();
+            int ny = cell.y + dir.getDeltaY();
 
             if (nx >= 0 && ny >= 0 && nx < width && ny < height && !maze[ny][nx].visited) {
                 neighbors.add(maze[ny][nx]);
             }
         }
         return neighbors;
-    }
-
-    public static boolean isWallBetween(Cell a, Cell b) {
-        if (a.x == b.x) {
-            if (a.y < b.y) {
-                return a.bottom || b.top;
-            } else {
-                return a.top || b.bottom;
-            }
-        } else if (a.y == b.y) {
-            if (a.x < b.x) {
-                return a.right || b.left;
-            } else {
-                return a.left || b.right;
-            }
-        }
-        return true;
     }
 
 
@@ -119,7 +88,14 @@ public class MazeUtils {
         session.sendMessage(new TextMessage(sb.toString()));
     }
 
-    public static void sendSolutionPath(List<Cell> solutionPath, Logger logger, WebSocketSession session) throws Exception {
+    public static void sendSolutionPath(List<Cell> solutionPath, WebSocketSession session, Object... options) throws Exception {
+        Logger logger = null;
+        for(Object option : options) {
+            if (option instanceof Logger) {
+                logger = (Logger) option;
+            }
+        }
+
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         for (Cell cell : solutionPath) {
@@ -127,7 +103,10 @@ public class MazeUtils {
             if (solutionPath.indexOf(cell) < solutionPath.size() - 1) sb.append(",");
         }
         sb.append("]");
-        logger.info("Sending solution path\n");
+        if(logger != null){
+            logger.info("Sending solution path\n");
+        }
+
         session.sendMessage(new TextMessage(sb.toString()));
     }
 
@@ -170,24 +149,4 @@ public class MazeUtils {
             }
         }
     }
-
-    public static void removeWall(Cell a, Cell b) {
-        int dx = b.x - a.x;
-        int dy = b.y - a.y;
-
-        if (dx == 1) {
-            a.right = false;
-            b.left = false;
-        } else if (dx == -1) {
-            a.left = false;
-            b.right = false;
-        } else if (dy == 1) {
-            a.bottom = false;
-            b.top = false;
-        } else if (dy == -1) {
-            a.top = false;
-            b.bottom = false;
-        }
-    }
-
 }
