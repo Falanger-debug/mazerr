@@ -23,6 +23,8 @@ public class MazeGenerator {
     private Cell entryCell;
     private Cell exitCell;
     private final List<Cell> solutionPath = new ArrayList<>();
+    private volatile boolean shouldPause = false;
+    private volatile boolean shouldStop = false;
 
     public MazeGenerator(WebSocketSession session, int width, int height, int speed, String method) {
         this.session = session;
@@ -42,13 +44,25 @@ public class MazeGenerator {
         logger.info("Maze generation started");
         MazeUtils.setRandomEntryAndExit(maze, width, height, random, this);
 
-        if ("Prim".equals(method)) {
-            logger.info("Using Prim's algorithm");
-            prim();
-        } else {
-            logger.info("Using recursive backtracking algorithm");
-            recursiveBacktracking();
+        while (!shouldStop) {
+            if (shouldPause) {
+                synchronized (this) {
+                    while (shouldPause && !shouldStop) {
+                        logger.info("Maze generation paused");
+                        wait();
+                    }
+                }
+            }
+            if ("Prim".equals(method)) {
+                logger.info("Using Prim's algorithm");
+                prim();
+            } else {
+                logger.info("Using recursive backtracking algorithm");
+                recursiveBacktracking();
+            }
+//            setShouldStop(true);
         }
+
 
         logger.info("Maze generation completed");
         MazeUtils.findSolutionPath(maze, width, height, entryCell, exitCell, solutionPath);
@@ -92,6 +106,7 @@ public class MazeGenerator {
                 currentCell = randomFrontierCell;
 
                 MazeUtils.sendMazeState(maze, width, height, session);
+                pauseIfNeeded();
                 Thread.sleep(speed);
 
                 frontier.addAll(MazeUtils.getAdjacentCells(maze, width, height, currentCell));
@@ -104,6 +119,7 @@ public class MazeGenerator {
 
 
     private void recursiveBacktracking() throws Exception {
+
         Stack<Cell> stack = new Stack<>();
         entryCell.visit();
         stack.push(entryCell);
@@ -120,8 +136,24 @@ public class MazeGenerator {
                 next.visit();
                 stack.push(next);
                 MazeUtils.sendMazeState(maze, width, height, session);
+                pauseIfNeeded();
                 Thread.sleep(speed);
             }
         }
     }
+
+    public synchronized void setShouldPause(boolean shouldPause) {
+        this.shouldPause = shouldPause;
+        if (!shouldPause) {
+            notifyAll();
+        }
+    }
+
+    private synchronized void pauseIfNeeded() throws InterruptedException {
+        while (shouldPause && !shouldStop) {
+            logger.debug("Maze generation paused");
+            wait();
+        }
+    }
+
 }

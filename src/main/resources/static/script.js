@@ -1,20 +1,44 @@
 let socket;
 let mazeSize;
 
-document.getElementById('mazeForm').addEventListener('submit', function(event) {
-  event.preventDefault();
-  const size = document.getElementById('size').value;
-  const speed = document.getElementById('speed').value;
-  const algorithm = document.getElementById('algorithm').value;
-  mazeSize = size;
 
-  if (socket && socket.readyState === WebSocket.OPEN) {
-    socket.close();
-    document.getElementById('maze').innerHTML = '';
-  }
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('mazeForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const size = document.getElementById('size').value;
+    const speed = document.getElementById('speed').value;
+    const algorithm = document.getElementById('algorithm').value;
+    mazeSize = size;
 
-  generateMaze(size, speed, algorithm);
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.close();
+      document.getElementById('maze').innerHTML = '';
+    }
+
+    generateMaze(size, speed, algorithm);
+  });
+
+  document.getElementById('pauseButton').addEventListener('click', () => {
+    console.log('Pause button clicked');
+    if (socket.readyState === WebSocket.OPEN) {
+      console.log('Sending pause to server');
+      socket.send('pause');
+    }
+  });
+
+  document.getElementById('continueButton').addEventListener('click', () => {
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send('continue');
+    }
+  });
+
+  document.getElementById('stopButton').addEventListener('click', () => {
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send('stop');
+    }
+  });
 });
+
 
 function generateMaze(size, speed, algorithm) {
   console.log(`Generating maze with size=${size}, speed=${speed}, algorithm=${algorithm}`); // Logowanie

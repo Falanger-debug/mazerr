@@ -1,6 +1,7 @@
 package com.falanger.mazerr.Maze;
 
 
+import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -181,6 +182,5 @@ public class MazeUtils {
         }
         return true;
     }
-
 
 }
