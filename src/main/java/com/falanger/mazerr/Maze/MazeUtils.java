@@ -41,7 +41,7 @@ public class MazeUtils {
         generator.setExitCell(exitCell);
     }
 
-    public static List<Cell> getNeighbors(Cell currentCell, Cell[][] maze, int width, int height, boolean alreadyChecked) {
+    public static List<Cell> getNeighbors(Cell currentCell, Cell[][] maze, int width, int height, boolean checkWalls) {
         List<Cell> neighbors = new ArrayList<>();
         for (Direction dir : Direction.values()) {
             int nx = currentCell.x + dir.getDeltaX();
@@ -49,19 +49,14 @@ public class MazeUtils {
 
             if (nx >= 0 && ny >= 0 && nx < width && ny < height) {
                 Cell neighbor = maze[ny][nx];
-                if (!neighbor.visited) {
-                    if (alreadyChecked) {
-                        if (!currentCell.isWallBetween(neighbor)) {
-                            neighbors.add(neighbor);
-                        }
-                    } else {
-                        neighbors.add(neighbor);
-                    }
+                if (!neighbor.visited && (!checkWalls || !currentCell.isWallBetween(neighbor))) {
+                    neighbors.add(neighbor);
                 }
             }
         }
         return neighbors;
     }
+
 
     public static void sendMazeState(Cell[][] maze, int width, int height, WebSocketSession session) throws
             Exception {
@@ -108,7 +103,7 @@ public class MazeUtils {
         Stack<Cell> stack = new Stack<>();
         Map<Cell, Cell> pathMap = new HashMap<>();
         resetVisitedCells(maze, width, height);
-        entryCell.visited = true;
+        entryCell.visit();
         stack.push(entryCell);
 
         while (!stack.isEmpty()) {
@@ -120,7 +115,7 @@ public class MazeUtils {
             List<Cell> neighbors = MazeUtils.getNeighbors(current, maze, width, height, true);
             for (Cell neighbor : neighbors) {
                 if (!neighbor.visited) {
-                    neighbor.visited = true;
+                    neighbor.visit();
                     stack.push(neighbor);
                     pathMap.put(neighbor, current);
                 }
@@ -139,8 +134,53 @@ public class MazeUtils {
     private static void resetVisitedCells(Cell[][] maze, int width, int height) {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                maze[y][x].visited = false;
+                maze[y][x].resetVisit();
             }
         }
     }
+
+
+    public static Set<Cell> getAdjacentCells(Cell[][] maze, int width, int height, Cell currentCell){
+        Set<Cell> adjacentCells = new HashSet<>();
+        for (Direction dir : Direction.values()) {
+            int nx = currentCell.x + dir.getDeltaX();
+            int ny = currentCell.y + dir.getDeltaY();
+
+            if (nx >= 0 && ny >= 0 && nx < width && ny < height && !maze[ny][nx].visited) {
+                Cell neighbor = maze[ny][nx];
+                adjacentCells.add(neighbor);
+            }
+        }
+        return adjacentCells;
+    }
+
+    public static Cell getRandomCellFromACollection(Collection<Cell> collection) {
+        Cell cell = null;
+        if(collection.isEmpty()){
+            return null;
+        }
+        int item = new Random().nextInt(collection.size());
+        int i = 0;
+        for (Cell obj : collection) {
+            if (i == item) {
+                cell = obj;
+                break;
+            }
+            i++;
+        }
+        return cell;
+    }
+
+    public static boolean areAllCellVisited(Cell[][] maze, int width, int height){
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (!maze[y][x].visited) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+
 }

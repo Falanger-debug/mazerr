@@ -74,4 +74,12 @@ public class Cell {
         }
         return true;
     }
+
+    public void visit() {
+        this.visited = true;
+    }
+
+    public void resetVisit() {
+        this.visited = false;
+    }
 }
