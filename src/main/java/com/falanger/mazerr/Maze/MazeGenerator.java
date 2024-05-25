@@ -68,12 +68,9 @@ public class MazeGenerator {
 
     private void prim() throws Exception {
         Set<Cell> frontier = new HashSet<>(MazeUtils.getAdjacentCells(maze, width, height, entryCell));
-        logger.debug("Starting at entry cell: ({}, {})", entryCell.x, entryCell.y);
-        logger.debug("Initial frontier set: {}", frontier.size());
 
         Cell currentCell = entryCell;
         currentCell.visit();
-        logger.debug("Visited entry cell: ({}, {})", currentCell.x, currentCell.y);
 
 
         Cell randomFrontierCell = MazeUtils.getRandomCellFromACollection(frontier);
@@ -81,45 +78,36 @@ public class MazeGenerator {
             currentCell.removeWall(randomFrontierCell);
             randomFrontierCell.visit();
             frontier.remove(randomFrontierCell);
-            logger.debug("Removed wall between ({}, {}) and ({}, {}), visited", currentCell.x, currentCell.y, randomFrontierCell.x, randomFrontierCell.y);
         }
 
 
         while (!frontier.isEmpty()) {
             frontier.addAll(MazeUtils.getAdjacentCells(maze, width, height, randomFrontierCell));
-            logger.debug("Frontier expanded to size: {}", frontier.size());
 
             randomFrontierCell = MazeUtils.getRandomCellFromACollection(frontier);
             if (randomFrontierCell == null) {
-                logger.debug("No more frontier cells to process");
                 break;
             }
 
             List<Cell> metNeighbors = MazeUtils.getMetNeighbors(randomFrontierCell, maze, width, height);
-            logger.debug("Got {} met neighbors for cell ({}, {})", metNeighbors.size(), randomFrontierCell.x, randomFrontierCell.y);
 
             Cell randomNeighbor = MazeUtils.getRandomCellFromACollection(metNeighbors);
             if (randomNeighbor == null) {
-                logger.debug("No neighbors found for cell ({}, {}), continuing...", randomFrontierCell.x, randomFrontierCell.y);
                 continue;
             }
 
             randomFrontierCell.visit();
             randomNeighbor.removeWall(randomFrontierCell);
             frontier.remove(randomFrontierCell);
-            logger.debug("Connecting cell ({}, {}) with cell ({}, {}) and removing wall.", randomFrontierCell.x, randomFrontierCell.y, randomNeighbor.x, randomNeighbor.y);
 
             MazeUtils.sendMazeState(maze, width, height, session);
             pauseIfNeeded();
             Thread.sleep(speed);
 
-            logger.debug("Current maze state sent, paused if needed, sleeping for {}", speed);
         }
 
         MazeUtils.sendMazeState(maze, width, height, session);
-        logger.debug("Final maze state sent");
     }
-
 
 
     private void recursiveBacktracking() throws Exception {
