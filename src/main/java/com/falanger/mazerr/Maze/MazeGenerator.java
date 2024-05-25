@@ -55,7 +55,11 @@ public class MazeGenerator {
         if ("Prim".equals(method)) {
             logger.info("Using Prim's algorithm");
             prim();
-        } else {
+        } else if ("Kruskal".equals(method)) {
+            logger.info("Using Kruskal's algorithm");
+            kruskal();
+        }
+        else {
             logger.info("Using recursive backtracking algorithm");
             recursiveBacktracking();
         }
@@ -65,6 +69,42 @@ public class MazeGenerator {
         MazeUtils.findSolutionPath(maze, width, height, entryCell, exitCell, solutionPath);
         MazeUtils.sendSolutionPath(solutionPath, session);
     }
+    private void kruskal() throws Exception {
+        List<Edge> edges = new ArrayList<>();
+        DisjointSet ds = new DisjointSet(width * height);
+
+        // Inicjalizacja krawędzi
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (x < width - 1) { // Krawędź pozioma
+                    edges.add(new Edge(x, y, x + 1, y, random.nextInt()));
+                }
+                if (y < height - 1) { // Krawędź pionowa
+                    edges.add(new Edge(x, y, x, y + 1, random.nextInt()));
+                }
+            }
+        }
+
+        // Sortowanie krawędzi według wagi
+        Collections.sort(edges, Comparator.comparingInt(e -> e.weight));
+
+        for (Edge edge : edges) {
+            int cell1 = edge.y1 * width + edge.x1;
+            int cell2 = edge.y2 * width + edge.x2;
+
+            if (ds.find(cell1) != ds.find(cell2)) {
+                ds.union(cell1, cell2);
+                maze[edge.y1][edge.x1].removeWall(maze[edge.y2][edge.x2]);
+                maze[edge.y2][edge.x2].visit();
+                MazeUtils.sendMazeState(maze, width, height, session);
+                pauseIfNeeded();
+                Thread.sleep(speed);
+            }
+        }
+
+        MazeUtils.sendMazeState(maze, width, height, session);
+    }
+
 
     private void prim() throws Exception {
         Set<Cell> frontier = new HashSet<>(MazeUtils.getAdjacentCells(maze, width, height, entryCell));
