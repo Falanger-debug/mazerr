@@ -1,9 +1,9 @@
 package com.falanger.mazerr.Maze;
 
-import ch.qos.logback.classic.Logger;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,7 +12,7 @@ public class MazeWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, MazeGenerator> sessionGenerators = new ConcurrentHashMap<>();
 
     @Override
-    public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    public void handleTextMessage(WebSocketSession session, TextMessage message){
         String payload = message.getPayload();
         MazeGenerator generator = sessionGenerators.get(session.getId());
 
@@ -33,9 +33,6 @@ public class MazeWebSocketHandler extends TextWebSocketHandler {
             generator.setShouldPause(true);
         } else if ("continue".equals(payload) && generator != null) {
             generator.setShouldPause(false);
-        } else if ("stop".equals(payload) && generator != null) {
-            generator.setShouldStop(true);
-            sessionGenerators.remove(session.getId()); // Usunięcie generatora po zakończeniu
         }
     }
 

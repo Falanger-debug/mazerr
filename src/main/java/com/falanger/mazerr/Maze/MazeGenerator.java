@@ -24,7 +24,6 @@ public class MazeGenerator {
     private Cell exitCell;
     private final List<Cell> solutionPath = new ArrayList<>();
     private volatile boolean shouldPause = false;
-    private volatile boolean shouldStop = false;
 
     public MazeGenerator(WebSocketSession session, int width, int height, int speed, String method) {
         this.session = session;
@@ -44,23 +43,21 @@ public class MazeGenerator {
         logger.info("Maze generation started");
         MazeUtils.setRandomEntryAndExit(maze, width, height, random, this);
 
-        while (!shouldStop) {
-            if (shouldPause) {
-                synchronized (this) {
-                    while (shouldPause && !shouldStop) {
-                        logger.info("Maze generation paused");
-                        wait();
-                    }
+
+        if (shouldPause) {
+            synchronized (this) {
+                while (shouldPause) {
+                    logger.info("Maze generation paused");
+                    wait();
                 }
             }
-            if ("Prim".equals(method)) {
-                logger.info("Using Prim's algorithm");
-                prim();
-            } else {
-                logger.info("Using recursive backtracking algorithm");
-                recursiveBacktracking();
-            }
-//            setShouldStop(true);
+        }
+        if ("Prim".equals(method)) {
+            logger.info("Using Prim's algorithm");
+            prim();
+        } else {
+            logger.info("Using recursive backtracking algorithm");
+            recursiveBacktracking();
         }
 
 
@@ -77,8 +74,8 @@ public class MazeGenerator {
         currentCell.visit();
         logger.debug("Starting at entry cell: ({}, {})", entryCell.x, entryCell.y);
 
-        while(!MazeUtils.areAllCellVisited(maze,width, height)){
-            while(!frontier.isEmpty()){
+        while (!MazeUtils.areAllCellVisited(maze, width, height) ) {
+            while (!frontier.isEmpty()) {
                 logger.debug("Frontier size before selection: {}", frontier.size());
                 Cell randomFrontierCell = MazeUtils.getRandomCellFromACollection(frontier);
                 assert randomFrontierCell != null;
@@ -86,7 +83,7 @@ public class MazeGenerator {
                 List<Cell> neighbors = MazeUtils.getNeighbors(randomFrontierCell, maze, width, height, false);
                 logger.debug("Neighbors of cell ({}, {}): {}", randomFrontierCell.x, randomFrontierCell.y, neighbors.size());
                 Cell randomNeighbor = MazeUtils.getRandomCellFromACollection(neighbors);
-                if(randomNeighbor == null){
+                if (randomNeighbor == null) {
                     logger.debug("Neighbors list is empty for cell ({}, {}).", randomFrontierCell.x, randomFrontierCell.y);
 
                     frontier.remove(randomFrontierCell);
@@ -98,7 +95,7 @@ public class MazeGenerator {
 
                 randomFrontierCell.removeWall(randomNeighbor);
                 randomFrontierCell.visit();
-                if(neighbors.isEmpty()){
+                if (neighbors.isEmpty()) {
                     frontier.remove(randomFrontierCell);
                     logger.debug("Removed cell ({}, {}) from frontier", randomFrontierCell.x, randomFrontierCell.y);
                 }
@@ -115,7 +112,6 @@ public class MazeGenerator {
         }
         MazeUtils.sendMazeState(maze, width, height, session);
     }
-
 
 
     private void recursiveBacktracking() throws Exception {
@@ -150,7 +146,7 @@ public class MazeGenerator {
     }
 
     private synchronized void pauseIfNeeded() throws InterruptedException {
-        while (shouldPause && !shouldStop) {
+        while (shouldPause) {
             logger.debug("Maze generation paused");
             wait();
         }
