@@ -1,7 +1,6 @@
 package com.falanger.mazerr.Maze;
 
 
-import lombok.extern.java.Log;
 import org.slf4j.Logger;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -58,6 +57,22 @@ public class MazeUtils {
         return neighbors;
     }
 
+
+    public static List<Cell> getMetNeighbors(Cell currentCell, Cell[][] maze, int width, int height) {
+        List<Cell> neighbors = new ArrayList<>();
+        for (Direction dir : Direction.values()) {
+            int nx = currentCell.x + dir.getDeltaX();
+            int ny = currentCell.y + dir.getDeltaY();
+
+            if (nx >= 0 && ny >= 0 && nx < width && ny < height) {
+                Cell neighbor = maze[ny][nx];
+                if (neighbor.visited) {
+                    neighbors.add(neighbor);
+                }
+            }
+        }
+        return neighbors;
+    }
 
     public static void sendMazeState(Cell[][] maze, int width, int height, WebSocketSession session) throws
             Exception {
@@ -155,11 +170,9 @@ public class MazeUtils {
         return adjacentCells;
     }
 
+
     public static Cell getRandomCellFromACollection(Collection<Cell> collection) {
         Cell cell = null;
-        if(collection.isEmpty()){
-            return null;
-        }
         int item = new Random().nextInt(collection.size());
         int i = 0;
         for (Cell obj : collection) {
