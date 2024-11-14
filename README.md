@@ -19,13 +19,19 @@ This project is a Java app which visualizes three maze-generating methods:
 ### Generating Methods
 - **Recursive Backtracking**:
   This algorithm randomly visits neighboring cells, marking them as part of the maze path. If it encounters a cell with no unvisited neighbors, it "backtracks" to the last visited cell with unvisited neighbors and continues. This creates a maze with a single path from start to finish, without cycles.
+  
  ![mazerr_recursive_backtracking-ezgif com-optimize](https://github.com/user-attachments/assets/7a1eda1e-eb44-467e-bc83-13011945a861)
+ 
 - **Prim's Algorithm**:
   Prim's algorithm builds a maze by starting from an initial cell and adding random walls to a frontier list. For each step, it picks a random wall from the frontier, connects it to an unvisited cell, and adds new walls to the frontier. This method results in a maze with multiple paths and a more "natural" look.
-  https://github.com/user-attachments/assets/0c84232b-92b7-4f23-970c-61175e10c7e0
+
+  ![mazerr_prim-ezgif com-optimize](https://github.com/user-attachments/assets/6895496b-41ef-457e-8644-e45bd23d5f60)
+  
 - **Kruskal's Algorithm**:
   Kruskal’s algorithm generates a maze by treating each cell as a distinct set and gradually merging them. It randomly removes walls between cells, merging sets as it connects them. This continues until all cells are interconnected in a single set, creating a maze with complex paths and potential cycles.
-  https://github.com/user-attachments/assets/ad1650f5-ad03-4bf3-ab87-b3d90cbae006
+
+  ![mazerr_kruskal-ezgif com-optimize](https://github.com/user-attachments/assets/de8edfea-c0e3-4075-a55c-bb813501fd01)
+  
 ### Installation
 Ensure you have Java21 or higher installed, along with Maven. Then follow these steps:
 1. **Clone the repository:**
