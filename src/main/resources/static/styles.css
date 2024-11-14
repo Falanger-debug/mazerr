@@ -6,12 +6,15 @@ body {
     margin: 0;
     padding: 20px;
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    background-image: url("background.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+
 }
 
 h1 {
     margin-bottom: 20px;
-    color: #333;
+    color: #FFA500;
 }
 
 form {
@@ -24,7 +27,11 @@ form {
 
 form label {
     margin-right: 5px;
-    color: #333;
+    color: #ffffff;
+    background: #0056b3;
+    padding: 5px;
+    border: #FFA500 solid 2px;
+    border-radius: 55px;
 }
 
 form input {
@@ -37,9 +44,9 @@ form input {
 
 form button {
     padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
     background-color: #007bff;
+    border: #FFA500 solid 2px;
+    border-radius: 55px;
     color: white;
     cursor: pointer;
 }
