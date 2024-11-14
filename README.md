@@ -19,7 +19,7 @@ This project is a Java app which visualizes three maze-generating methods:
 ### Generating Methods
 - **Recursive Backtracking**:
   This algorithm randomly visits neighboring cells, marking them as part of the maze path. If it encounters a cell with no unvisited neighbors, it "backtracks" to the last visited cell with unvisited neighbors and continues. This creates a maze with a single path from start to finish, without cycles.
-  https://github.com/user-attachments/assets/6b6b0c4a-de4e-4fe0-ad23-6ed311f2e440
+ ![mazerr_recursive_backtracking-ezgif com-optimize](https://github.com/user-attachments/assets/7a1eda1e-eb44-467e-bc83-13011945a861)
 - **Prim's Algorithm**:
   Prim's algorithm builds a maze by starting from an initial cell and adding random walls to a frontier list. For each step, it picks a random wall from the frontier, connects it to an unvisited cell, and adds new walls to the frontier. This method results in a maze with multiple paths and a more "natural" look.
   https://github.com/user-attachments/assets/0c84232b-92b7-4f23-970c-61175e10c7e0
