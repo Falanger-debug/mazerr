@@ -10,7 +10,7 @@ This project is a Java app which visualizes three maze-generating methods:
 4. [Contribution](#contributing)
 5. [License](#license)
 
-![Mazerr_page-0001](https://github.com/user-attachments/assets/a1f7a700-7a90-4a5b-8aa1-910819564c3a)
+<img src="https://github.com/Falanger-debug/mazerr/blob/master/mazerUsage-min.jpg"/>
 
 ### Features
 - **Interactive Control Panel**: Start, pause, continue generating
